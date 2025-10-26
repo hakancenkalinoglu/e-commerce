@@ -1,6 +1,6 @@
 import { Request, Response} from 'express';
 import { Product } from '../types/product';
-import { products, findProductById, createProduct, getAllProducts, deleteProduct} from '../data/products';
+import { products, findProductById, createProduct, getAllProducts, updateProduct, deleteProduct} from '../data/products';
 import { validateProductData } from '../utils/validation';
 export class productController{
     static async getProducts(req: Request, res: Response): Promise<void>{
@@ -74,6 +74,29 @@ export class productController{
         });
     }
 
+    static async updateProduct(req: Request, res: Response): Promise<void>{
+        const { id } = req.params;
+        const updateData = req.body;
+
+        const existingProduct = findProductById(id);
+
+        if(!existingProduct){
+            res.status(404).json({
+                success: false,
+                message: 'Product not found'
+            });
+            return;
+        }
+
+        const updatedProduct = updateProduct(id, updateData);
+
+        res.json({
+            success: true,
+            data: updatedProduct,
+            message: 'Product updated successfult'
+        })
+    }
+
     static async deleteProduct(req: Request, res: Response): Promise<void>{
         const { id } = req.params;
         const deletedProduct = deleteProduct(id);
@@ -92,4 +115,6 @@ export class productController{
             message: 'Product deleted successfuly'
         });
     }
+
+    
 }

@@ -89,3 +89,23 @@ export const deleteProduct = (id: string): Product | undefined => {
       
   return deletedProduct;
 }
+
+export const updateProduct = (id: string, updateData: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | undefined => {
+  const index = products.findIndex(product => product.id === id);
+
+  if(index === -1){
+    return undefined;
+  }
+
+  const existingProduct = products[index];
+  
+  const updatedProduct: Product = {
+    ...existingProduct,
+    ...updateData,
+    updatedAt: new Date()
+  };
+
+  products[index] = updatedProduct;
+
+  return updatedProduct;
+}
