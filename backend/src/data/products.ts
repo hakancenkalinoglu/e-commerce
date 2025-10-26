@@ -77,3 +77,15 @@ export const createProduct = (productData: Omit<Product, 'id' | 'createdAt' | 'u
 export const getAllProducts = (): Product[] => {
   return products;
 };
+
+export const deleteProduct = (id: string): Product | undefined => {
+  const index = products.findIndex(product => product.id === id);
+  
+  if (index === -1) {
+    return undefined;
+}
+  const deletedProduct = products[index];
+  products.splice(index, 1);
+      
+  return deletedProduct;
+}

@@ -7,7 +7,38 @@ export class AuthController {
         try {
             const { firstName, lastName, email, password, role }: RegisterRequest = req.body;
 
-            //Is email exist ? 
+            if(!firstName || firstName.trim() === '' || !lastName || lastName.trim() === ''){
+                res.status(400).json({
+                    success: false,
+                    message: 'Name is required'
+                  });
+                  return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                res.status(400).json({
+                  success: false,
+                  message: 'Invalid email format'
+                });
+                return;
+              }
+
+            // şimdilik 2 den küçük
+            if(password.length < 2){
+                res.status(400).json({
+                    success: false,
+                    message: 'Password must be at least 8 characters'
+                });
+                return;
+            }  
+            if (role !== 'seller' && role !== 'customer') {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid role'
+                });
+                return;
+            }
             const existingUser = findUserByEmail(email);
             if(existingUser){
                 res.status(400).json({
