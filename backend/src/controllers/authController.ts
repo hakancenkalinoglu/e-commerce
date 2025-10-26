@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { RegisterRequest, LoginRequest } from '../types/user';
 import { createUser, findUserByEmail, users } from '../data/users';
+import bcrypt from 'bcryptjs'
 
 export class AuthController {
     static async register(req: Request, res: Response): Promise<void> {
@@ -48,6 +49,8 @@ export class AuthController {
                 return;
             }
 
+            const hashedPassword = await bcrypt.hash(password, 10);
+
             const newUser = createUser({
                 firstName,
                 lastName,
@@ -91,8 +94,9 @@ export class AuthController {
                 return;
             }
 
-            //password kontrolü şimdilik basit
-            if(existingUser.password !== password){
+            const isPasswordMatch = await bcrypt.compare(password, existingUser.password);
+
+            if(!isPasswordMatch){
                 res.status(400).json({
                     success: false,
                     message: 'Invalid password',
