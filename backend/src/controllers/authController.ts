@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { RegisterRequest, LoginRequest } from '../types/user';
 import { createUser, findUserByEmail, users } from '../data/users';
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
+import { Jwt } from '../utils/jwt';
 
 export class AuthController {
     static async register(req: Request, res: Response): Promise<void> {
@@ -25,8 +26,7 @@ export class AuthController {
                 return;
               }
 
-            // şimdilik 2 den küçük
-            if(password.length < 2){
+            if(password.length < 8){
                 res.status(400).json({
                     success: false,
                     message: 'Password must be at least 8 characters'
@@ -55,7 +55,7 @@ export class AuthController {
                 firstName,
                 lastName,
                 email,
-                password,
+                password: hashedPassword,
                 role
             });
 
@@ -104,9 +104,16 @@ export class AuthController {
                 return;
             }
 
+            const token = Jwt.createJwt({
+                id: existingUser.id,
+                email: existingUser.email,
+                role: existingUser.role
+            });
+
             res.status(200).json({
                 success: true,
                 message: 'Login successful',
+                token,
                 user: {
                     id: existingUser.id,
                     firstName: existingUser.firstName,
@@ -124,18 +131,30 @@ export class AuthController {
         }
     }
 
-    static async getCurrentUser(req: Request, res: Response): Promise<void>{
+    static async getCurrentUser(req: any, res: Response): Promise<void>{
         try {
-            //geçici olarak ilk user gelecek sonra session/token ekleyeceğiz)
-            if(users.length === 0){
-                res.status(404).json({
+            // req.user authMiddleware'den geliyor (token'dan decode edilmiş)
+            const tokenUser = req.user;
+            
+            if(!tokenUser){
+                res.status(401).json({
                     success: false,
-                    message: 'No user found'
+                    message: 'User not authenticated'
                 });
                 return;
             }
 
-            const user = users[0];
+            // Token'dan gelen ID ile veritabanından tam kullanıcı bilgilerini al
+            const user = users.find(u => u.id === tokenUser.id);
+            
+            if(!user){
+                res.status(404).json({
+                    success: false,
+                    message: 'User not found'
+                });
+                return;
+            }
+
             res.status(200).json({
                 success: true,
                 user:{

@@ -2,6 +2,7 @@ import { Request, Response} from 'express';
 import { Product } from '../types/product';
 import { products, findProductById, createProduct, getAllProducts, updateProduct, deleteProduct} from '../data/products';
 import { validateProductData } from '../utils/validation';
+
 export class productController{
     static async getProducts(req: Request, res: Response): Promise<void>{
         const allProducts = getAllProducts();
@@ -93,7 +94,7 @@ export class productController{
         res.json({
             success: true,
             data: updatedProduct,
-            message: 'Product updated successfult'
+            message: 'Product updated successfuly'
         })
     }
 

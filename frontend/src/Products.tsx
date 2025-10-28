@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { axiosInstance } from './services/auth';
 
 interface Product {
   id: string;
@@ -21,7 +21,7 @@ const Products: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axiosInstance.get('/products');
       setProducts(response.data.data);
       setLoading(false);
     } catch (error) {
